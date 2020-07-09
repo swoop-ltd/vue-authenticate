@@ -51,14 +51,12 @@ export default class OAuth2 {
     return Promise.resolve(this.providerConfig.authorizationEndpoint).then(authorizationEndpoint => {
       const requestParams = this._stringifyRequestParams()
       const url = requestParams.length ? [authorizationEndpoint, requestParams].join('?') : authorizationEndpoint
-      if (this.providerConfig.popup === false) {
-        window.location.href = url
-        return null
-      }
       return new OAuthPopup(url, this.providerConfig.name, this.providerConfig.popupOptions)
     }).then(popup => {
       return new Promise((resolve, reject) => {
-        if (!popup) reject()
+        if (this.providerConfig.popup === false) {
+          return window.location.href = url
+        }
         popup.open(this.providerConfig.redirectUri).then((response) => {
           if (this.providerConfig.responseType === 'token' || !this.providerConfig.url) {
             return resolve(response)
